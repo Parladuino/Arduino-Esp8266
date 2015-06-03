@@ -31,3 +31,8 @@ por
 
 
 
+
+
+
+
+Agradecemos a Adam Rudd y Peter Knight por su aporte desinteresado a esta librerira.
