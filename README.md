@@ -1,5 +1,5 @@
 # Arduino-Esp8266
-Instalano esta libreria en tu Arduino conectado a internet via Esp8266, puedes conectarte a Parladuino con facilidad y comenzar a la charla entre dispositivos inmediatamente.
+Instalando esta libreria en tu Arduino conectado a internet via Esp8266, puedes conectarte a Parladuino con facilidad y comenzar a la charla entre dispositivos inmediatamente.
 
 Si quieres conocer mas acerca de Parladuino entra en:
 
@@ -8,14 +8,16 @@ http://www.mind-tech.com.ar/Parladuino
 
 Para utilizarla necesitarás :
 
+Una cuenta de Parladuino (no te preocupes, es gratis!!)
+
 Compilar con IDE 1.0.6 de Arduino
 
 Flashear tu Esp8266 con la version v0.9.5.2 del Firmware 
 
-Libreria Base64
+Agregar las librerias Base64 y Sha1
+
 https://github.com/adamvr/arduino-base64
 
-Libreria Sha1
 https://github.com/Cathedrow/Cryptosuite/tree/master/Sha
 
 
