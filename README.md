@@ -6,7 +6,7 @@ Si quieres conocer mas acerca de Parladuino entra en:
 http://www.mind-tech.com.ar/Parladuino
 
 
-Para utilizarla necesitar·s :
+Para utilizarla necesitar√°s :
 
 Compilar con IDE 1.0.6 de Arduino
 
@@ -21,11 +21,11 @@ https://github.com/Cathedrow/Cryptosuite/tree/master/Sha
 
 Ademas deberas cambiar este paso en tu libreria SoftwareSerial.h
 
-#define _SS_MAX_RX_BUFF 64 // RX buffer size
+ #define _SS_MAX_RX_BUFF 64 // RX buffer size
 
 por 
 
-#define _SS_MAX_RX_BUFF 256 // RX buffer size
+ #define _SS_MAX_RX_BUFF 256 // RX buffer size
 
 
 
