@@ -3,7 +3,7 @@
 #include "Base64.h"
 
 //protocolo en formato JSON
-//{"fi":"xxxxxxxx","fg":"xxxxxxxx","ti":"xxxxxxxx","tg":"xxxxxxxx","ac":"###","an":[{"p":###,"n":"xxxx","v":#####},{...}],"dg":[{"p":###,"n":"xxxx","v":#####},{...}]}
+//{"fi":"xxxxxxxx","fg":"xxxxxxxx","ti":"xxxxxxxx","tg":"xxxxxxxx","ac":###,"an":[{"p":###,"n":"xxxx","v":#####},{...}],"dg":[{"p":###,"n":"xxxx","v":#####},{...}]}
 
 
 // Constantes necesarias para la serializacion y deserializacion de los mensajes
@@ -292,6 +292,7 @@ bool Parladuino::joinAP(){
 
 	Serial.println("joining");
 
+	//Reset de la placa hasta obtener ready
 	_esp8266->println(F("AT+RST"));
 	if (!findOver(F("ready"),1000))
 		return false;
@@ -301,6 +302,7 @@ bool Parladuino::joinAP(){
 	if (!findOver(F("OK"),1000))
 		return false;
 
+	//se une al acces point
 	_esp8266->print(F("AT+CWJAP=\""));
 	_esp8266->print(_SSID);
 	_esp8266->print(F("\",\""));

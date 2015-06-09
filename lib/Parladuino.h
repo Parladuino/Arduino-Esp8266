@@ -11,7 +11,7 @@
 // PARA OPTIMIZAR:
 
 // configurar cantidad maxima pines analogicos y digitales en el mensaje
-// teneiendo en cuenta la reducida mamoria del arduino. 
+// teniendo en cuenta la reducida mamoria del arduino. 
 #define PARLADUINO_ANALOGS_COUNT 3
 #define PARLADUINO_DIGITALS_COUNT 3
 
@@ -135,9 +135,9 @@ public:
 		} 
 	} ;
 
-	// quien herede debe implemntar el mettodo serialize
+	// quien herede debe implemntar el metodo serialize
 	virtual void serialize(char (&result)[PARLADUINO_SERIALIZE_STRING_LENGTH]) = 0;
-	// quien herede debe implemntar el mettodo deserialize
+	// quien herede debe implemntar el metodo deserialize
 	virtual void deserialize(char &c) = 0;
 
 protected :
@@ -156,7 +156,7 @@ protected :
 	bool _itsIn;
 	byte _property ;
 	
-	//                 Para la deserializacion 
+	
 	//escribe el nombre de la propiedad en la serializacion
 	void writePropertyName(byte index,char (&result)[PARLADUINO_SERIALIZE_STRING_LENGTH]){
 		byte p=0;
@@ -268,10 +268,10 @@ public:
 	bool joinAP();
 	bool startClient();
 	bool doHandShake();
-	bool send(ParladuinoMessage &arduino);
+	bool send(ParladuinoMessage &message);
 	bool send(char (&data)[PARLADUINO_SERIALIZE_STRING_LENGTH]);
 	Stream* _esp8266 ;
-	char* buildMessage (ParladuinoMessage &message);
+	//char* buildMessage (ParladuinoMessage &message);
 	void listen(ParladuinoMessage &message);
 	void apply(ParladuinoMessage &message);
 	void reply(ParladuinoMessage &message);
