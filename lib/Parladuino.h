@@ -5,52 +5,74 @@
 
 #include "Arduino.h"
 
+#define PARLADUINO_SSID 0
+#define PARLADUINO_WIFIPASS 33
+
+#define PARLADUINO_USER 66
+#define PARLADUINO_PASS 107
+
+#define PARLADUINO_ID 148
+#define PARLADUINO_GROUP 157
+
+
+
+
 // IP de Parladuino
-#define PARLADUINO_IP "AT+CIPSTART=\"TCP\",\"www.Mind-Tech.com.ar\",80"
+#define PARLADUINO_IP "AT+CIPSTART=1,\"TCP\",\"190.190.178.205\",80"
 
 // PARA OPTIMIZAR:
 
 // configurar cantidad maxima pines analogicos y digitales en el mensaje
 // teniendo en cuenta la reducida mamoria del arduino. 
-#define PARLADUINO_ANALOGS_COUNT 3
+#define PARLADUINO_ANALOGS_COUNT 1
 #define PARLADUINO_DIGITALS_COUNT 3
 
-// 256 es el maximo, si la serializazacion del mensaje es pequeña se puede reducir
-#define PARLADUINO_SERIALIZE_STRING_LENGTH 256 
+// 256 es el maximo, si la serializazacion del mensaje es pequeï¿½a se puede reducir
+#define PARLADUINO_SERIALIZE_STRING_LENGTH 255 
 
 // no cambiar
-#define PARLADUINO_DESERIALIZE_BUFFER_LENGTH 10 
+#define PARLADUINO_DESERIALIZE_BUFFER_LENGTH 20 
 #define PARLADUINO_MAX_PROPERTY_NAME_LENGTH 40
 
 // cantidad de milisengundos entre ping y ping
-#define PARLADUINO_PING_LAPSE 14000 
+#define PARLADUINO_PING_LAPSE 30000 
 
 // quitar para no debuguear
 #define DEBUGING
 
+//Prueba en socket test
+//#define TESTING
+
 // acciones permitidas en el protocolo
 enum ParladuinoActions {
-    PARLADUINO_ACTION_NONE,
-    PARLADUINO_ACTION_REPLY_TO_ID,	//hacer una pregunta al ID
-    PARLADUINO_ACTION_REPLY_TO_GROUP, //hacer una pregunta al Grupo
+	PARLADUINO_ACTION_NONE,
+	PARLADUINO_ACTION_REPLY_TO_ID,
+	//hacer una pregunta al ID
+	PARLADUINO_ACTION_REPLY_TO_GROUP, //hacer una pregunta al Grupo
 	PARLADUINO_ACTION_WRITE_TO_ID_AND_REPLY_TO_ID, //ejecutar escritura a un ID y solicitar respuesta 
-    PARLADUINO_ACTION_WRITE_TO_ID_AND_REPLY_TO_GROUP, //ejecutar escritura a un ID y solicitar respuesta para mi GRUPO 
+	PARLADUINO_ACTION_WRITE_TO_ID_AND_REPLY_TO_GROUP, //ejecutar escritura a un ID y solicitar respuesta para mi GRUPO 
 	PARLADUINO_ACTION_WRITE_TO_GROUP_AND_REPLY_TO_ID, //ejecutar escritura a un GRUPO y solicitar respuesta
-    PARLADUINO_ACTION_WRITE_TO_GROUP_AND_REPLY_TO_GROUP, //ejecutar escritura a un GRUPO y solicitar respuesta para mi GRUPO
-    PARLADUINO_ACTION_WRITE_TO_ID, //ejecutar escritura a un ID 
-    PARLADUINO_ACTION_WRITE_TO_GROUP, //ejecutar escritura a un GRUPO
-    PARLADUINO_ACTION_RESPOND_TO_ID, //responder a un ID 
-    PARLADUINO_ACTION_RESPOND_TO_GROUP //responder a un GRUPO
+	PARLADUINO_ACTION_WRITE_TO_GROUP_AND_REPLY_TO_GROUP, //ejecutar escritura a un GRUPO y solicitar respuesta para mi GRUPO
+	PARLADUINO_ACTION_WRITE_TO_ID, //ejecutar escritura a un ID 
+	PARLADUINO_ACTION_WRITE_TO_GROUP, //ejecutar escritura a un GRUPO
+	PARLADUINO_ACTION_RESPOND_TO_ID, //responder a un ID 
+	PARLADUINO_ACTION_RESPOND_TO_GROUP, //responder a un GRUPO
+	PARLADUINO_ACTION_JOIN_ACCES_POINT = 100,
+	PARLADUINO_ACTION_WRITE_SETTINGS=101
+
 };
 
+
+
+
 //constantes utilies para serializacion y deserealizacion JSON
-const prog_char PROGMEM PARLADUINO_QUOTATION  = '\"';
-const prog_char PROGMEM PARLADUINO_COLON  = ':';
-const prog_char PROGMEM PARLADUINO_OPEN_CURLY  = '{';
-const prog_char PROGMEM PARLADUINO_CLOSE_CURLY  = '}';
-const prog_char PROGMEM PARLADUINO_OPEN_BRACKET = '[';
-const prog_char PROGMEM PARLADUINO_CLOSE_BRACKET = ']';
-const prog_char PROGMEM PARLADUINO_COMMA = ',';
+const char PROGMEM PARLADUINO_QUOTATION  = '\"';
+const char PROGMEM PARLADUINO_COLON  = ':';
+const char PROGMEM PARLADUINO_OPEN_CURLY  = '{';
+const char PROGMEM PARLADUINO_CLOSE_CURLY  = '}';
+const char PROGMEM PARLADUINO_OPEN_BRACKET = '[';
+const char PROGMEM PARLADUINO_CLOSE_BRACKET = ']';
+const char PROGMEM PARLADUINO_COMMA = ',';
 
 
 //representa un objeto serializable 
@@ -59,7 +81,8 @@ class ParladuinoSerializable{
 
 public:
 	ParladuinoSerializable():_buffer(),_property (0),_itsIn(false) {
-	}	
+	}
+
 
 	//serializa una propiedad del tipo int 
 	void serializeProperty( byte prop,int value,char (&result)[PARLADUINO_SERIALIZE_STRING_LENGTH]){
@@ -95,16 +118,22 @@ public:
 	};
 
 	// deserializa un mensaje
-	void deserializeObject(char &c)	
+	void deserializeObject(char &c)
+
 	{
-		
 		if (!_itsIn){
 			for (byte n=0;n<propCount;n++){
 				if (c == _properties(n)[_indexes[n]]){
 					_indexes[n]++;
-					if (_properties(n)[_indexes[n]]==(char)0)	 {
-						if (_indexes[n]>PARLADUINO_MAX_PROPERTY_NAME_LENGTH)
-							break;
+					if (_properties(n)[_indexes[n]]==(char)0)
+					{
+						if (_indexes[n]>PARLADUINO_MAX_PROPERTY_NAME_LENGTH){
+#ifdef DEBUGING
+							Serial.print("error---->");
+							Serial.println(_indexes[n]);
+#endif
+
+							break;}
 						_property = n;
 						_itsIn=true;
 #ifdef DEBUGING
@@ -115,11 +144,13 @@ public:
 #endif
 					}
 				} else {
-					_indexes[n] = 0;					 
+					_indexes[n] = 0;
+
 				}
-			}				
+			}
+
 		} else {
-			if (c != '\"' && c!=',' && c!='}' && c!=']' ){
+			if (c != '\"' && c!=',' && c!='}' && c!=']'){
 				_buffer[strlen(_buffer)]=c;
 			}
 			else {
@@ -128,7 +159,7 @@ public:
 				Serial.println(_property);
 #endif
 				setProperty();
-				memset(&_buffer, (char)0, sizeof(_buffer));
+				memset(&_buffer, (char)0, sizeof(_buffer)); //limpia _buffer
 
 				_itsIn=false;
 			}
@@ -146,7 +177,7 @@ protected :
 	// los dos metodos siguientes deben ser implementados por la clase que herede
 
 	// devuelve el nombre de la propiedad que se esta deserializando
-	virtual char* _properties(byte index);
+	virtual char* _properties(byte index) = 0;
 	// asigna un valor a la propiedad que se esta deserializando
 	virtual void setProperty() = 0;
 
@@ -155,8 +186,6 @@ protected :
 	char _buffer[PARLADUINO_DESERIALIZE_BUFFER_LENGTH];
 	bool _itsIn;
 	byte _property ;
-	
-	
 	//escribe el nombre de la propiedad en la serializacion
 	void writePropertyName(byte index,char (&result)[PARLADUINO_SERIALIZE_STRING_LENGTH]){
 		byte p=0;
@@ -178,7 +207,7 @@ public:
 	void setValue(char* value) ;
 
 	int value;
-	char name[5];
+	char name[15];
 	int8_t pin;
 
 
@@ -234,9 +263,17 @@ public:
 		_digitalIndex++;
 	};
 
+	void cleanDigitals() {
+		_digitalIndex=0;
+	};
+
 	int addAnalog(ParladuinoAnalogPin analog){
 		analogs[_analogIndex] = analog;
 		_analogIndex++;
+	};
+
+	void cleanAnalogs() {
+		_analogIndex = 0;
 	};
 
 	void serialize(char (&result)[PARLADUINO_SERIALIZE_STRING_LENGTH]);
@@ -252,6 +289,8 @@ protected:
 
 };
 
+
+
 //Clase principal. 
 //conecta con Parladuino
 //mantiene la conexion activa
@@ -262,11 +301,12 @@ protected:
 
 class Parladuino {
 public:
-	Parladuino(Stream& serial):_lastPing (millis()) {_esp8266=&serial;};
-	void initialize(char* ssid,char* pass,char* user,char* password,char* group,char* id);
+	Parladuino(Stream& serial):_lastPing (millis()),_urlDecode(false) {_esp8266=&serial;};
+	//void initialize(const char* ssid,const char* pass,const char* user,const char* password,const char* group,const char* id);
+	//void initialize(const char* user, const char* password, const char* group, const char* id);
 	void initialize();
+	void setAsServer();
 	bool joinAP();
-	bool startClient();
 	bool doHandShake();
 	bool send(ParladuinoMessage &message);
 	bool send(char (&data)[PARLADUINO_SERIALIZE_STRING_LENGTH]);
@@ -277,19 +317,27 @@ public:
 	void reply(ParladuinoMessage &message);
 	bool sendPing();
 	void cleanBuffer();
+	bool listening;
 protected:
 
 	char readOver(unsigned int timeSpam);
 	bool findOver(const __FlashStringHelper* target,unsigned int timeSpam);
-	char* _SSID ;
-	char* _PASS ;
-	char* _USER ;
-	char* _PASSWORD;
-	char* _GROUP;
+	byte decodeHex(char c);
+	void printFromEEPROM(int from);
+	byte lengthFromEEPROM(int from);
+	char* concatFromEEPROM(char* text, int from);
+	/*const char* _SSID ;
+	const char* _PASS ;*/
+	/*const char* _USER ;
+	const char* _PASSWORD;
+	const char* _GROUP;*/
 	char* _ID;
 
 	unsigned long _lastPing;
+	bool _urlDecode;
+	bool _writeSettings;
 };
 
 #endif
+
 
