@@ -55,7 +55,7 @@ void loop()
 {
   // do not use Delay() inside the loop
 
-  wdt_reset();  
+    wdt_reset();  
 
   parla.listen(message);
 
@@ -71,39 +71,38 @@ void loop()
 
     if (millis() - _lastMessage >3000){
 
-      _lastMessage = millis();
-
-      sensors.requestTemperatures();
-
-      float temp = sensors.getTempCByIndex(0);
-
-      int tempI = (int)temp;
-
-      int tempD = (temp-tempI)*100;
-
       message.cleanDigitals();
 
       message.cleanAnalogs();
 
-      message.addDigital(ParladuinoDigitalPin(tempI,"",5));
+      _lastMessage = millis();
 
-      message.addDigital(ParladuinoDigitalPin(tempD,"",6));
+      if (!_toggle){
 
-      message.action=PARLADUINO_ACTION_WRITE_TO_GROUP;
+        sensors.requestTemperatures();
 
-      message.setToGroup("MONITOR");
+        float temp = sensors.getTempCByIndex(0);
 
-      parla.send(message);
+        int tempI = (int)temp;
 
-      _toggle = (_state && tempI<30) || (!_state && tempI >= 30);
+        int tempD = (temp-tempI)*100;
 
-      if (_toggle){
+        message.addDigital(ParladuinoDigitalPin(tempI,"",5));
+
+        message.addDigital(ParladuinoDigitalPin(tempD,"",6));
+
+        message.action=PARLADUINO_ACTION_WRITE_TO_GROUP;
+
+        message.setToGroup("MONITOR");
+
+        _toggle = (_state && tempI<30) || (!_state && tempI >= 30);
+
+      } 
+      else {
+
+        _toggle = false;
 
         _state = !_state;
-
-        message.cleanDigitals();
-
-        message.cleanAnalogs();
 
         message.action = PARLADUINO_ACTION_WRITE_TO_ID_AND_REPLY_TO_GROUP;
 
@@ -111,15 +110,18 @@ void loop()
 
         message.addDigital(ParladuinoDigitalPin(_state,"",3));
 
-        parla.send(message);
-
       }
+
+      parla.send(message);
 
     }
 
   }
 
 }
+
+
+
 
 
 
